@@ -1,0 +1,7 @@
+<?php
+/** @var \ETechFlow\SeoLayeredNav\Block\FilterMeta $block */
+$canonical = $block->getCanonicalUrl();
+?>
+<?php if ($canonical): ?>
+<link rel="canonical" href="<?= $block->escapeUrl($canonical) ?>" />
+<?php endif; ?>

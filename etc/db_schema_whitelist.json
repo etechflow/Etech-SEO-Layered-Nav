@@ -1,0 +1,19 @@
+{
+    "etechflow_seo_filter_alias": {
+        "column": {
+            "alias_id": true,
+            "attribute_id": true,
+            "option_id": true,
+            "store_id": true,
+            "alias": true
+        },
+        "index": {
+            "ETECHFLOW_SEO_FILTER_ALIAS_ATTRIBUTE_ID_STORE_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ETECHFLOW_SEO_FILTER_ALIAS_ATTRIBUTE_ID_STORE_ID_ALIAS": true,
+            "ETECHFLOW_SEO_FILTER_ALIAS_ATTRIBUTE_ID_STORE_ID_OPTION_ID": true
+        }
+    }
+}

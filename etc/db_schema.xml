@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="etechflow_seo_filter_alias" resource="default" engine="innodb"
+           comment="SEO layered-nav: human-readable alias per attribute option per store">
+        <column xsi:type="int" name="alias_id" unsigned="true" nullable="false" identity="true" comment="Row Id"/>
+        <column xsi:type="smallint" name="attribute_id" unsigned="true" nullable="false" comment="EAV attribute id"/>
+        <column xsi:type="int" name="option_id" unsigned="true" nullable="false" comment="EAV option id"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" default="0" comment="Store view id (0 = default/all)"/>
+        <column xsi:type="varchar" name="alias" length="255" nullable="false" comment="URL-safe slug"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="alias_id"/>
+        </constraint>
+        <!-- one slug per (attribute, store): guarantees reversible slug->id resolution -->
+        <constraint xsi:type="unique" referenceId="ETECHFLOW_SEO_FILTER_ALIAS_ATTR_STORE_ALIAS">
+            <column name="attribute_id"/>
+            <column name="store_id"/>
+            <column name="alias"/>
+        </constraint>
+        <!-- one alias per (attribute, store, option): upsert key for regeneration -->
+        <constraint xsi:type="unique" referenceId="ETECHFLOW_SEO_FILTER_ALIAS_ATTR_STORE_OPTION">
+            <column name="attribute_id"/>
+            <column name="store_id"/>
+            <column name="option_id"/>
+        </constraint>
+        <index referenceId="ETECHFLOW_SEO_FILTER_ALIAS_ATTR_STORE" indexType="btree">
+            <column name="attribute_id"/>
+            <column name="store_id"/>
+        </index>
+    </table>
+</schema>

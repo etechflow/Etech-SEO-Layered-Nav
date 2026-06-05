@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- OUTBOUND: option-id -> slug when building filter links -->
+    <type name="Magento\Catalog\Model\Layer\Filter\Item">
+        <plugin name="etechflow_seonav_outbound_item_url"
+                type="ETechFlow\SeoLayeredNav\Plugin\Layer\Filter\OutboundItemUrl"/>
+    </type>
+    <!-- OUTBOUND (swatches): option-id -> slug for swatch-rendered filter links -->
+    <type name="Magento\Swatches\Block\LayeredNavigation\RenderLayered">
+        <plugin name="etechflow_seonav_outbound_swatch_url"
+                type="ETechFlow\SeoLayeredNav\Plugin\Layer\Filter\OutboundSwatchUrl"/>
+    </type>
+    <!-- INBOUND: slug -> option-id before the filter is applied -->
+    <type name="Magento\CatalogSearch\Model\Layer\Filter\Attribute">
+        <plugin name="etechflow_seonav_inbound_attribute_apply"
+                type="ETechFlow\SeoLayeredNav\Plugin\Layer\Filter\InboundAttributeApply"/>
+    </type>
+    <!-- Multi-select: disjunctive facet so active attributes keep all their options -->
+    <type name="Magento\CatalogSearch\Model\ResourceModel\Fulltext\Collection">
+        <plugin name="etechflow_seonav_disjunctive_facet"
+                type="ETechFlow\SeoLayeredNav\Plugin\Search\DisjunctiveFacet"/>
+    </type>
+    <!-- Phase 3: path-format router (after url-rewrite @20, before default) -->
+    <type name="Magento\Framework\App\RouterList">
+        <arguments>
+            <argument name="routerList" xsi:type="array">
+                <item name="etechflowSeoNav" xsi:type="array">
+                    <item name="class" xsi:type="string">ETechFlow\SeoLayeredNav\Controller\Router</item>
+                    <item name="disable" xsi:type="boolean">false</item>
+                    <item name="sortOrder" xsi:type="string">35</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+</config>

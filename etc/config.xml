@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <etechflow_seonav>
+            <general>
+                <!-- OFF by default: storefront URLs are untouched until a merchant opts in
+                     AND aliases have been generated. Safe to deploy with no visible change. -->
+                <enabled>0</enabled>
+                <!-- query = ?manufacturer=yale ; path = /category/manufacturer/yale -->
+                <url_format>query</url_format>
+                <!-- multi-select layered nav (disjunctive facets + click-to-add) -->
+                <multiselect>0</multiselect>
+            </general>
+            <seo>
+                <!-- Phase 2: canonical/robots on filter pages. Gated SEPARATELY from
+                     readable URLs, so turning on slugs never changes indexing by itself. -->
+                <manage_meta>0</manage_meta>
+                <single_filter_indexable>1</single_filter_indexable>
+                <indexable_attributes/>
+                <multi_filter_robots>NOINDEX,FOLLOW</multi_filter_robots>
+                <sitemap_filter_pages>0</sitemap_filter_pages>
+                <noindex_pagination>1</noindex_pagination>
+            </seo>
+        </etechflow_seonav>
+    </default>
+</config>
