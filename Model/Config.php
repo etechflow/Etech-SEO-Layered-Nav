@@ -9,6 +9,9 @@ use Magento\Store\Model\ScopeInterface;
 /**
  * Thin config reader. The single gate for the whole feature: while disabled,
  * every storefront plugin returns immediately, so the module is inert.
+ *
+ * isEnabled() additionally requires a valid licence — there is NO environment
+ * toggle and NO host bypass. On dev/staging, set a valid HMAC key.
  */
 class Config
 {
@@ -27,13 +30,20 @@ class Config
     private const XML_NOINDEX_PAGINATION = 'etechflow_seonav/seo/noindex_pagination';
 
     public function __construct(
-        private readonly ScopeConfigInterface $scopeConfig
+        private readonly ScopeConfigInterface $scopeConfig,
+        private readonly LicenseValidator $licenseValidator
     ) {
     }
 
-    /** Phase 1: rewrite filter URLs to readable slugs. */
+    /**
+     * Phase 1: rewrite filter URLs to readable slugs. Requires a valid licence
+     * AND the merchant's enable flag — the licence is ALWAYS enforced.
+     */
     public function isEnabled(?int $storeId = null): bool
     {
+        if (!$this->licenseValidator->isValid()) {
+            return false;
+        }
         return $this->flag(self::XML_ENABLED, $storeId);
     }
 
@@ -59,9 +69,18 @@ class Config
         return $this->flag(self::XML_MULTISELECT, $storeId);
     }
 
-    /** Phase 2 master switch: manage canonical/robots on filter pages. */
+    /**
+     * Phase 2 master switch: manage canonical/robots on filter pages.
+     *
+     * Licence-gated too: Phase 2 (canonical/robots via MetaPolicy/FilterMeta) AND
+     * Phase 2.5 (XML sitemap via FilterPageItemProvider) both key off this method,
+     * so a valid licence is required for them — not just Phase 1's isEnabled().
+     */
     public function managesMeta(?int $storeId = null): bool
     {
+        if (!$this->licenseValidator->isValid()) {
+            return false;
+        }
         return $this->flag(self::XML_MANAGE_META, $storeId);
     }
 

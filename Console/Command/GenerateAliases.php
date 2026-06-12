@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ETechFlow\SeoLayeredNav\Console\Command;
 
 use ETechFlow\SeoLayeredNav\Model\AliasRebuilder;
+use ETechFlow\SeoLayeredNav\Model\LicenseValidator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -21,6 +22,7 @@ class GenerateAliases extends Command
 {
     public function __construct(
         private readonly AliasRebuilder $rebuilder,
+        private readonly LicenseValidator $licenseValidator,
         ?string $name = null
     ) {
         parent::__construct($name);
@@ -37,6 +39,10 @@ class GenerateAliases extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (!$this->licenseValidator->isValid()) {
+            $output->writeln('<error>SEO Layered Navigation is not licensed for this host. Enter a valid licence key in Stores > Config > eTechFlow > SEO Layered Navigation.</error>');
+            return Command::FAILURE;
+        }
         $storeId = (int) $input->getOption('store');
         $dryRun = (bool) $input->getOption('dry-run');
         $onlyCode = $input->getOption('attribute') ?: null;

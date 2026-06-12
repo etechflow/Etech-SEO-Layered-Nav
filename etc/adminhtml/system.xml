@@ -10,6 +10,76 @@
             <label>SEO Layered Navigation</label>
             <tab>etechflow</tab>
             <resource>Magento_Catalog::config_catalog</resource>
+
+            <group id="module_status" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Module Status</label>
+                <frontend_model>ETechFlow\SeoLayeredNav\Block\Adminhtml\System\Config\ModuleStatus</frontend_model>
+            </group>
+
+            <group id="license" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>License</label>
+                <field id="license_key" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>License Key</label>
+                    <comment><![CDATA[
+                        Paste the SP-XXXX key from your purchase email, or a per-module HMAC key, or a
+                        shared eTechFlow bundle key. Bound to the domain you provided at checkout.<br/>
+                        A valid licence is always required. <code>www.</code> prefix is normalised.
+                    ]]></comment>
+                </field>
+                <field id="bundle_license_key" translate="label comment" type="obscure" sortOrder="15" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Bundle License Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <config_path>etechflow_bundle/license/license_key</config_path>
+                    <comment><![CDATA[
+                        Shared key across ALL eTechFlow modules. If you purchased the eTechFlow Bundle,
+                        paste it here once and every installed eTechFlow module activates.<br/>
+                        Stored encrypted.
+                    ]]></comment>
+                </field>
+                <field id="portal_url" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>License Portal URL</label>
+                    <comment><![CDATA[
+                        The eTechFlow portal endpoint that validates SP-XXXX subscription keys.
+                        Default: <code>https://subpanel-paralyses-president.ngrok-free.dev/license/validate</code>.
+                        Change only if eTechFlow notifies you of a new portal URL.
+                    ]]></comment>
+                </field>
+                <field id="issued_key" translate="label" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Last Issued Key (auto-managed)</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <comment><![CDATA[
+                        Read-only audit field. Auto-populated when the portal accepts a key for the first time.
+                        Used by the module to auto-restore the licence after a portal IP-block lift.
+                        Do not edit manually.
+                    ]]></comment>
+                </field>
+            </group>
+
+            <group id="payment" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Payment (Stripe)</label>
+                <field id="stripe_secret_key" translate="label comment" type="obscure" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Stripe Secret Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <comment><![CDATA[
+                        Your Stripe <code>sk_test_...</code> (test mode) or <code>sk_live_...</code> (live).
+                        Used to create the Checkout Session when a merchant clicks Pay on the gate page.
+                        Stored encrypted.
+                    ]]></comment>
+                </field>
+                <field id="stripe_publishable_key" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Stripe Publishable Key</label>
+                    <comment><![CDATA[
+                        Your Stripe <code>pk_test_...</code> or <code>pk_live_...</code> key.
+                    ]]></comment>
+                </field>
+                <field id="stripe_currency" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Currency</label>
+                    <comment><![CDATA[
+                        Three-letter Stripe currency code, lowercase. Default: <code>usd</code>.
+                    ]]></comment>
+                </field>
+            </group>
+
             <group id="general" translate="label" type="text" sortOrder="10"
                    showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General</label>
@@ -48,13 +118,13 @@
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Make single-filter pages indexable</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <comment>A page with exactly one attribute filter (e.g. <em>?manufacturer=yale</em>) gets INDEX,FOLLOW + a self-canonical, becoming its own landing page. Off = treat single filters like multi.</comment>
+                    <comment><![CDATA[A page with exactly one attribute filter (e.g. <em>?manufacturer=yale</em>) gets INDEX,FOLLOW + a self-canonical, becoming its own landing page. Off = treat single filters like multi.]]></comment>
                     <depends><field id="manage_meta">1</field></depends>
                 </field>
                 <field id="indexable_attributes" translate="label comment" type="textarea" sortOrder="30"
                        showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Limit indexable filters to these attributes</label>
-                    <comment>Comma-separated attribute codes (e.g. <em>manufacturer,collection</em>). Blank = any single attribute filter is indexable.</comment>
+                    <comment><![CDATA[Comma-separated attribute codes (e.g. <em>manufacturer,collection</em>). Blank = any single attribute filter is indexable.]]></comment>
                     <depends><field id="manage_meta">1</field><field id="single_filter_indexable">1</field></depends>
                 </field>
                 <field id="multi_filter_robots" translate="label comment" type="select" sortOrder="40"

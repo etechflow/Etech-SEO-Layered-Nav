@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!--
+        Licence gate for the module's own admin route only. Fires exclusively for
+        etechflow_seonav/* controllers (alias management + rebuild), so no other
+        admin page is touched. The observer skips the licence controllers to avoid
+        a redirect loop.
+    -->
+    <event name="controller_action_predispatch_etechflow_seonav">
+        <observer name="etechflow_seonav_admin_gate"
+                  instance="ETechFlow\SeoLayeredNav\Observer\AdminGate"/>
+    </event>
+</config>
