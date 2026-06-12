@@ -13,7 +13,7 @@ Magento's layered navigation produces `?manufacturer=2069&blade=2071` — opaque
 - Works on dropdown filters, swatches, and inbound requests; outbound links in the layer are rewritten automatically.
 - Optional multi-select (disjunctive facets — click to add a value).
 - Deterministic slugs (`SlugGenerator`): `"Premier 2000+"` → `premier-2000`, stable across stores and re-runs.
-- Aliases stored in `etechflow_seo_filter_alias`; generate with `bin/magento etechflow:seo-nav:generate-aliases`.
+- Aliases stored in `etechflow_seo_filter_alias`. Rebuild from the admin — **Marketing → SEO Filter URLs → "Rebuild SEO URLs"** (one click, with an optional store-scope picker) — or via `bin/magento etechflow:seo-nav:generate-aliases`. Both share one code path (`Model\AliasRebuilder`). Run it after imports or attribute-option changes.
 
 **Phase 2 — Canonical & robots for filter pages** *(toggle: `seo/manage_meta`, gated separately)*
 - Single indexable filter → self-canonical + `INDEX,FOLLOW`.

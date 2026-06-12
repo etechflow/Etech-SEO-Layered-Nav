@@ -1,0 +1,37 @@
+<?php
+/** @var \ETechFlow\SeoLayeredNav\Block\Adminhtml\Alias\Rebuild $block */
+$count = $block->getCurrentAliasCount();
+$stores = $block->getStoreOptions();
+?>
+<div class="admin__page-section">
+    <div class="admin__page-section-title">
+        <span class="title"><?= $block->escapeHtml(__('SEO Filter URLs')) ?></span>
+    </div>
+
+    <p style="margin: 1rem 0; color: #303030;">
+        <?= $block->escapeHtml(__('Generates the human-readable slug map for filterable attributes (e.g. ?manufacturer=yale instead of ?manufacturer=123). Run this after importing products, adding/renaming attribute options, or if filter URLs look stale.')) ?>
+    </p>
+
+    <p style="margin: 1rem 0;">
+        <strong><?= $block->escapeHtml(__('Current aliases on file:')) ?></strong>
+        <?= /* @noEscape */ (int) $count ?>
+    </p>
+
+    <form action="<?= $block->escapeUrl($block->getRebuildUrl()) ?>" method="post" style="margin-top: 1.5rem;">
+        <input name="form_key" type="hidden" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+
+        <label for="seonav_store" style="margin-right: .5rem;"><?= $block->escapeHtml(__('Scope:')) ?></label>
+        <select name="store_id" id="seonav_store" class="admin__control-select" style="width:auto;margin-right:1rem;">
+            <?php foreach ($stores as $opt): ?>
+                <option value="<?= (int) $opt['value'] ?>"><?= $block->escapeHtml($opt['label']) ?></option>
+            <?php endforeach; ?>
+        </select>
+
+        <button type="submit" class="action-primary">
+            <span><?= $block->escapeHtml(__('Rebuild SEO URLs')) ?></span>
+        </button>
+        <span style="margin-left: 1rem; color: #666;">
+            <?= $block->escapeHtml(__('Rebuilds all filterable attributes for the chosen scope (DELETE + re-INSERT) and flushes the alias cache.')) ?>
+        </span>
+    </form>
+</div>
