@@ -1,12 +1,27 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <add id="ETechFlow_SeoLayeredNav::seonav"
+        <!-- Own group heading in the Marketing menu (like "AI SEO" / "Meta Templates"),
+             so admins can see which module these pages belong to. -->
+        <add id="ETechFlow_SeoLayeredNav::seonav_root"
              title="SEO Layered Navigation"
              module="ETechFlow_SeoLayeredNav"
              sortOrder="95"
-             parent="Magento_Backend::marketing_seo"
+             parent="Magento_Backend::marketing"
+             resource="ETechFlow_SeoLayeredNav::seonav"/>
+        <add id="ETechFlow_SeoLayeredNav::seonav"
+             title="SEO Filter URLs"
+             module="ETechFlow_SeoLayeredNav"
+             sortOrder="10"
+             parent="ETechFlow_SeoLayeredNav::seonav_root"
              action="etechflow_seonav/alias/index"
+             resource="ETechFlow_SeoLayeredNav::seonav"/>
+        <add id="ETechFlow_SeoLayeredNav::seonav_config"
+             title="Configuration"
+             module="ETechFlow_SeoLayeredNav"
+             sortOrder="20"
+             parent="ETechFlow_SeoLayeredNav::seonav_root"
+             action="adminhtml/system_config/edit/section/etechflow_seonav"
              resource="ETechFlow_SeoLayeredNav::seonav"/>
     </menu>
 </config>
