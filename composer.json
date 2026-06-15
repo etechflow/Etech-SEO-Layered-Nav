@@ -3,7 +3,7 @@
     "description": "SEO-friendly layered navigation: human-readable filter URLs (slug<->option-id) for Magento Open Source / Adobe Commerce, theme-agnostic (Hyva/Luma).",
     "type": "magento2-module",
     "license": "proprietary",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "require": {
         "php": "~8.1.0||~8.2.0||~8.3.0||~8.4.0",
         "magento/framework": ">=103.0",
