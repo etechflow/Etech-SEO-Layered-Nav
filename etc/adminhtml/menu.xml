@@ -2,7 +2,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
         <add id="ETechFlow_SeoLayeredNav::seonav"
-             title="SEO Filter URLs"
+             title="SEO Layered Navigation"
              module="ETechFlow_SeoLayeredNav"
              sortOrder="95"
              parent="Magento_Backend::marketing_seo"
