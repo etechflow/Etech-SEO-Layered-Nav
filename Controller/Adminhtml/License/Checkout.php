@@ -27,9 +27,9 @@ class Checkout extends Action
 
     /** Plan slugs -> [name, amount in cents, display]. Tier-based plans. */
     private const PLAN_INFO = [
-        'sln_starter'      => ['name' => 'SEO Layered Nav — Starter',      'amount' => 1900, 'display' => '$19/month'],
-        'sln_professional' => ['name' => 'SEO Layered Nav — Professional', 'amount' => 4900, 'display' => '$49/month'],
-        'sln_enterprise'   => ['name' => 'SEO Layered Nav — Enterprise',   'amount' => 9900, 'display' => '$99/month'],
+        'slnav_weekly'  => ['name' => 'SEO Layered Nav — Weekly',  'amount' => 900,   'display' => '$9/week'],
+        'slnav_monthly' => ['name' => 'SEO Layered Nav — Monthly', 'amount' => 2900,  'display' => '$29/month'],
+        'slnav_yearly'  => ['name' => 'SEO Layered Nav — Yearly',  'amount' => 29000, 'display' => '$290/year'],
     ];
 
     public function __construct(
