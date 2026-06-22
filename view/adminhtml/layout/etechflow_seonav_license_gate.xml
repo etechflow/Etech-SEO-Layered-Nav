@@ -4,6 +4,11 @@
     <update handle="styles"/>
     <body>
         <referenceContainer name="content">
+            <block class="ETechFlow\SeoLayeredNav\Block\Adminhtml\UpdateNotice"
+                   name="etechflow_sln_update_notice_gate"
+                   template="ETechFlow_SeoLayeredNav::update-notice.phtml"
+                   cacheable="false"
+                   before="-"/>
             <block class="Magento\Backend\Block\Template"
                    name="etechflow.seonav.license.gate"
                    template="ETechFlow_SeoLayeredNav::license/gate.phtml"/>

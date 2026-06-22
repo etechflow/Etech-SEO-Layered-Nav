@@ -12,27 +12,22 @@ use Magento\Framework\App\CacheInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\HTTP\Client\Curl;
+use Magento\Framework\HTTP\Client\CurlFactory;
 use Magento\Framework\View\Result\PageFactory;
 
 /**
- * Landing page after payment. The buyer returns here from the webstore Paddle
- * checkout (module.etechflow.com) carrying the broker session id; we ask the
- * broker for the issued SP-XXXX key (it only returns one once Paddle has
- * confirmed payment), save it to config, and show the success page. Same shape
- * as the prior Stripe success -> portal activate flow; only the rail changed.
+ * Landing page after Stripe OR PayPal payment. For PayPal it captures the order
+ * via the portal; for Stripe it activates the session via the portal. Either way
+ * the portal verifies with ITS OWN keys, returns the SP-key, which is saved.
  */
 class Activated extends Action
 {
     public const ADMIN_RESOURCE = 'ETechFlow_SeoLayeredNav::seonav';
 
-    private const BROKER_URL = 'https://module.etechflow.com/api/license/result';
-    private const LICENSE_TOKEN = 'lcsk_8f3b9d2a7c14e605b9af2e7c1d8043f6';
-
     public function __construct(
         Context $context,
         private readonly PageFactory $pageFactory,
-        private readonly Curl $curl,
+        private readonly CurlFactory $curlFactory,
         private readonly WriterInterface $configWriter,
         private readonly CacheInterface $cache,
         private readonly LicenseValidator $licenseValidator
@@ -43,37 +38,60 @@ class Activated extends Action
     public function execute(): ResultInterface
     {
         $sessionId = trim((string) $this->getRequest()->getParam('session_id', ''));
+        $token     = trim((string) $this->getRequest()->getParam('token', ''));
+        $method    = trim((string) $this->getRequest()->getParam('method', ''));
+        $subId     = trim((string) $this->getRequest()->getParam('sub_id', ''));
         $plan      = trim((string) $this->getRequest()->getParam('plan', ''));
+        $domain    = trim((string) $this->getRequest()->getParam('domain', '')) ?: $this->licenseValidator->getCurrentHost();
+        $name      = trim((string) $this->getRequest()->getParam('name', ''));
+        $email     = trim((string) $this->getRequest()->getParam('email', ''));
 
-        if (!$sessionId) {
+        $isPaypal = ($method === 'paypal') || ($token !== '' && $sessionId === '');
+
+        if ($sessionId === '' && $token === '') {
             $this->messageManager->addErrorMessage(__('Invalid payment callback.'));
             return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('etechflow_seonav/license/gate');
         }
 
-        $payload = json_encode(['session_id' => $sessionId]);
+        $portal = rtrim(str_replace('/license/validate', '', $this->licenseValidator->getPortalUrl()), '/');
+        if ($isPaypal) {
+            $url     = $portal . '/payment/paypal/capture';
+            $payload = json_encode(array_filter(['orderID' => $token, 'sub_id' => $subId ?: null]));
+        } else {
+            $url     = $portal . '/license/activate';
+            $payload = json_encode(array_filter([
+                'session_id' => $sessionId,
+                'sub_id'     => $subId ?: null,
+                'domain'     => $domain,
+                'name'       => $name,
+                'email'      => $email,
+                'plan'       => $plan,
+            ]));
+        }
 
         $licenseKey = '';
         $planName   = '';
         $error      = '';
 
         try {
-            $this->curl->setTimeout(20);
-            $this->curl->addHeader('Content-Type', 'application/json');
-            $this->curl->addHeader('Accept', 'application/json');
-            $this->curl->addHeader('X-ETF-License-Token', self::LICENSE_TOKEN);
-            $this->curl->post(self::BROKER_URL, $payload);
-            $status = (int) $this->curl->getStatus();
-            $body   = (string) $this->curl->getBody();
+            $curl = $this->curlFactory->create();
+            $curl->setTimeout(30);
+            $curl->addHeader('Content-Type', 'application/json');
+            $curl->addHeader('Accept', 'application/json');
+            $curl->addHeader('X-ETF-License-Token', 'lcsk_8f3b9d2a7c14e605b9af2e7c1d8043f6');
+            $curl->post('https://module.etechflow.com/api/license/result', $payload);
+            $status = (int) $curl->getStatus();
+            $body   = (string) $curl->getBody();
             $data   = json_decode($body, true);
 
             if ($status === 200 && !empty($data['license_key'])) {
-                $licenseKey = $data['license_key'];
-                $planName   = $data['plan'] ?? $plan;
+                $licenseKey = (string) $data['license_key'];
+                $planName   = (string) ($data['plan'] ?? $plan);
             } else {
-                $error = $data['error'] ?? ('Payment not confirmed yet (status ' . $status . ').');
+                $error = is_array($data) && !empty($data['error']) ? $data['error'] : ('Portal returned status ' . $status . ': ' . $body);
             }
         } catch (\Throwable $e) {
-            $error = 'Could not reach the licensing portal: ' . $e->getMessage();
+            $error = 'Could not reach portal: ' . $e->getMessage();
         }
 
         if ($licenseKey) {
@@ -90,7 +108,7 @@ class Activated extends Action
                   ->setData('plan', $planName)
                   ->setData('error', $error)
                   ->setData('settings_url', $this->getUrl('adminhtml/system_config/edit/section/etechflow_seonav'))
-                  ->setData('management_url', $this->getUrl('adminhtml/system_config/edit/section/etechflow_seonav'));
+                  ->setData('management_url', $this->getUrl('etechflow_seonav/license/gate'));
         }
 
         return $page;

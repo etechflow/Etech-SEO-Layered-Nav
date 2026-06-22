@@ -9,29 +9,23 @@ use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\HTTP\Client\Curl;
+use Magento\Framework\HTTP\Client\CurlFactory;
 
 /**
- * Starts checkout by delegating to the eTechFlow webstore licensing broker
- * (module.etechflow.com). The broker opens a Paddle transaction on the
- * webstore's OWN Paddle account and returns the hosted pay URL; the portal
- * still issues the SP-XXXX key once payment clears. No card keys live in
- * Magento. Same redirect flow as the prior Stripe checkout.
+ * Starts checkout by delegating to the eTechFlow licensing portal. The posted
+ * `method` (stripe|paypal) chooses the portal endpoint; the portal creates the
+ * session/order with ITS OWN keys and returns a redirect URL (Stripe Checkout or
+ * the PayPal approval page). No payment keys live in Magento.
  */
 class Checkout extends Action
 {
     public const ADMIN_RESOURCE = 'ETechFlow_SeoLayeredNav::seonav';
 
     private const MODULE_ID = 'seo-layered-nav';
-    private const BROKER_URL = 'https://module.etechflow.com/api/license/checkout';
-    private const LICENSE_TOKEN = 'lcsk_8f3b9d2a7c14e605b9af2e7c1d8043f6';
-
-    /** Allowed plan slugs (the portal validates again server-side). */
-    private const PLAN_SLUGS = ['slnav_weekly', 'slnav_monthly', 'slnav_yearly'];
 
     public function __construct(
         Context $context,
-        private readonly Curl $curl,
+        private readonly CurlFactory $curlFactory,
         private readonly LicenseValidator $licenseValidator
     ) {
         parent::__construct($context);
@@ -42,11 +36,13 @@ class Checkout extends Action
         $plan   = trim((string) $this->getRequest()->getPost('plan', ''));
         $name   = trim((string) $this->getRequest()->getPost('name', ''));
         $email  = trim((string) $this->getRequest()->getPost('email', ''));
+        $method = trim((string) $this->getRequest()->getPost('method', 'stripe'));
+        $method = $method === 'paypal' ? 'paypal' : 'stripe';
         $domain = $this->licenseValidator->getCurrentHost();
 
         $gate = $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('etechflow_seonav/license/gate');
 
-        if (!$plan || !in_array($plan, self::PLAN_SLUGS, true)) {
+        if (!$plan) {
             $this->messageManager->addErrorMessage(__('Invalid plan selected.'));
             return $gate;
         }
@@ -55,6 +51,10 @@ class Checkout extends Action
             return $gate;
         }
 
+        $portalBase = rtrim(str_replace('/license/validate', '', $this->licenseValidator->getPortalUrl()), '/');
+        $endpoint = $method === 'paypal'
+            ? '/payment/paypal/create-order'
+            : '/payment/stripe/create-session';
         $payload = json_encode([
             'plan'             => $plan,
             'name'             => $name,
@@ -66,13 +66,14 @@ class Checkout extends Action
         ]);
 
         try {
-            $this->curl->setTimeout(20);
-            $this->curl->addHeader('Content-Type', 'application/json');
-            $this->curl->addHeader('Accept', 'application/json');
-            $this->curl->addHeader('X-ETF-License-Token', self::LICENSE_TOKEN);
-            $this->curl->post(self::BROKER_URL, $payload);
-            $status = (int) $this->curl->getStatus();
-            $body   = (string) $this->curl->getBody();
+            $curl = $this->curlFactory->create();
+            $curl->setTimeout(25);
+            $curl->addHeader('Content-Type', 'application/json');
+            $curl->addHeader('Accept', 'application/json');
+            $curl->addHeader('X-ETF-License-Token', 'lcsk_8f3b9d2a7c14e605b9af2e7c1d8043f6');
+            $curl->post('https://module.etechflow.com/api/license/checkout', $payload);
+            $status = (int) $curl->getStatus();
+            $body   = (string) $curl->getBody();
         } catch (\Throwable $e) {
             $this->messageManager->addErrorMessage(__('Could not reach the licensing portal. Please try again.'));
             return $gate;

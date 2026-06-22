@@ -40,7 +40,7 @@
                     <label>License Portal URL</label>
                     <comment><![CDATA[
                         The eTechFlow portal endpoint that validates SP-XXXX subscription keys.
-                        Default: <code>https://license-service.etechflow.com/license/validate</code>.
+                        Default: <code>https://subpanel-paralyses-president.ngrok-free.dev/license/validate</code>.
                         Change only if eTechFlow notifies you of a new portal URL.
                     ]]></comment>
                 </field>
@@ -55,30 +55,6 @@
                 </field>
             </group>
 
-            <group id="payment" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
-                <label>Payment (Stripe)</label>
-                <field id="stripe_secret_key" translate="label comment" type="obscure" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Stripe Secret Key</label>
-                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
-                    <comment><![CDATA[
-                        Your Stripe <code>sk_test_...</code> (test mode) or <code>sk_live_...</code> (live).
-                        Used to create the Checkout Session when a merchant clicks Pay on the gate page.
-                        Stored encrypted.
-                    ]]></comment>
-                </field>
-                <field id="stripe_publishable_key" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Stripe Publishable Key</label>
-                    <comment><![CDATA[
-                        Your Stripe <code>pk_test_...</code> or <code>pk_live_...</code> key.
-                    ]]></comment>
-                </field>
-                <field id="stripe_currency" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Currency</label>
-                    <comment><![CDATA[
-                        Three-letter Stripe currency code, lowercase. Default: <code>usd</code>.
-                    ]]></comment>
-                </field>
-            </group>
 
             <group id="general" translate="label" type="text" sortOrder="10"
                    showInDefault="1" showInWebsite="1" showInStore="1">
